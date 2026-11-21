@@ -86,5 +86,11 @@
     "regulated_deadline_years": 2,
     "regulated_rule_new_acquisition_on_or_after": "2026-08-04",
     "regulated_rule_transfer_on_or_after": "2026-10-01"
+  },
+  "merged_household": {
+    "note": "소득세법 시행령 제155조 제4항(동거봉양 합가), 제5항(혼인 합가). 합친 날(혼인한 날)부터 10년 이내 먼저 양도하는 주택",
+    "years": 10,
+    "parent_min_age": 60,
+    "supported_transfer_from": "2024-11-12"
   }
 }

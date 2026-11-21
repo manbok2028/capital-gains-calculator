@@ -4,6 +4,7 @@ from core import load_rules, tax_by_formula, local_income_tax
 from exemption import STATUS_LABELS, describe, format_won, judge_exemption, parse_scope
 from inputs import compute_periods, normalize_case
 from tax_base import calc_tax_base, describe_base
+from merged_household import REASON_TITLES, check_merged_household, parse_two_house_reason
 from temporary_two import check_temporary_two_house
 
 NOTICE = ("※ 입력하신 내용만으로 계산한 참고용 결과입니다. 실제 신고 세액은 세대 구성, 보유 주택 수, "
@@ -35,15 +36,20 @@ def calculate(raw, rules=None, basic_deduction_available=True):
     periods = compute_periods(case)
     scope = parse_scope(raw)
 
-    # 세대 보유 주택이 2채이면 일시적 2주택 특례 요건부터 확인한다.
+    # 세대 보유 주택이 2채이면 2주택이 된 이유(신규주택/동거봉양/혼인)에 맞는 특례 요건부터 확인한다.
     temp = None
     if scope["house_count"] == 2:
-        temp = check_temporary_two_house(case, raw, rules)
+        reason = parse_two_house_reason(raw)
+        title = REASON_TITLES[reason]
+        if reason == "temporary":
+            temp = check_temporary_two_house(case, raw, rules)
+        else:
+            temp = check_merged_household(case, raw, rules, reason)
         if temp["qualifies"]:
-            scope = dict(scope, house_count=1)  # 특례: 종전주택을 1세대 1주택으로 본다
+            scope = dict(scope, house_count=1)  # 특례: 양도하는 주택을 1세대 1주택으로 본다
         else:
             exemption = {"status": "CONSULT", "label": STATUS_LABELS["CONSULT"],
-                         "taxable_ratio": None, "reasons": ["일시적 2주택 특례 요건을 충족하지 못했습니다."]
+                         "taxable_ratio": None, "reasons": [f"{title} 요건을 충족하지 못했습니다."]
                          + temp["reasons"]
                          + ["이 경우 2주택자의 양도로 보아 조정대상지역 중과 등 별도 검토가 필요해 "
                             "자동 계산하지 않습니다. 상담이 필요합니다."]}
@@ -54,10 +60,10 @@ def calculate(raw, rules=None, basic_deduction_available=True):
     exemption = judge_exemption(case, periods, scope, rules)
     if temp is not None:
         if exemption["status"] == "TAXABLE":
-            # 일시적 2주택 요건은 맞지만 종전주택이 1세대 1주택 비과세 요건(보유 2년, 거주 2년)을 못 채운 경우
+            # 특례 요건은 맞지만 양도하는 주택이 1세대 1주택 비과세 요건(보유 2년, 거주 2년)을 못 채운 경우
             exemption = {"status": "CONSULT", "label": STATUS_LABELS["CONSULT"], "taxable_ratio": None,
                          "reasons": temp["reasons"]
-                         + ["그러나 종전주택이 1세대 1주택 비과세 요건을 충족하지 못했습니다."]
+                         + ["그러나 양도하는 주택이 1세대 1주택 비과세 요건을 충족하지 못했습니다."]
                          + exemption["reasons"]
                          + ["이 경우 2주택자의 양도로 과세될 수 있어 조정대상지역 중과 등 별도 검토가 필요합니다. "
                             "자동 계산하지 않으니 상담이 필요합니다."]}

@@ -6,8 +6,8 @@ from inputs import parse_date, parse_won
 from run_cases import run_all
 
 INTRO = """=== 양도소득세 계산기 (주택) ===
-자동 계산 범위: 국내 주택을 매매로 취득해 양도하는 경우 (1세대 1주택 및 일시적 2주택 비과세 판정 + 일반 과세)
-일시적 2주택 비과세 특례는 판정합니다. 3채 이상, 상속·증여 취득, 특례 요건 미충족 등은 계산하지 않고 상담을 안내합니다.
+자동 계산 범위: 국내 주택을 매매로 취득해 양도하는 경우 (1세대 1주택 및 2주택 특례 비과세 판정 + 일반 과세)
+일시적 2주택, 동거봉양 합가, 혼인 합가 비과세 특례는 판정합니다. 3채 이상, 상속·증여 취득, 특례 요건 미충족 등은 계산하지 않고 상담을 안내합니다.
 """
 
 
@@ -44,6 +44,11 @@ def parse_house_count(text):
         raise ValueError("주택 수는 1 이상이어야 합니다. (양도하는 주택 포함)")
 
 
+def parse_two_house_choice(text):
+    if text not in ("1", "2", "3"):
+        raise ValueError("1, 2, 3 중에서 입력하세요.")
+
+
 def parse_acquisition(text):
     parse_scope({"acquisition_type": text})
 
@@ -60,19 +65,35 @@ def collect_input():
     raw["house_count"] = ask("양도일 현재 본인과 배우자 등 같은 세대가 보유한 주택 수 (양도하는 주택 포함): ",
                              parse_house_count)
     if raw["house_count"] == "2":
-        print("\n[일시적 2주택 확인] 양도하는 주택(종전주택) 외에 신규주택을 새로 사서 2채가 된 경우의 질문입니다.")
-        raw["new_house_acquisition_date"] = ask("신규주택 취득일 (잔금일 등): ", parse_date)
-        raw["new_house_contract_date"] = ask("신규주택 매매계약 후 계약금을 지급한 날 (모르면 Enter): ",
-                                             parse_date, optional=True)
-        raw["house_count_before_new"] = ask("신규주택을 취득하기 직전 세대가 보유한 주택 수 (종전주택만 있었다면 1): ",
-                                            parse_house_count)
-        old_reg = ask_yes_no("신규주택 취득일 현재 종전주택이 조정대상지역에 있었습니까?")
-        new_reg = ask_yes_no("신규주택이 취득일 현재 조정대상지역에 있었습니까?")
-        raw["old_house_regulated_at_new_acquisition"] = "예" if old_reg else "아니오"
-        raw["new_house_regulated_at_acquisition"] = "예" if new_reg else "아니오"
-        if old_reg and new_reg:
-            raw["new_area_designation_date"] = ask("신규주택 소재지가 조정대상지역으로 공고된 날 (모르면 Enter): ",
-                                                   parse_date, optional=True)
+        print("\n[2주택 확인] 양도하는 주택 외에 한 채가 더 있는 이유를 알려주세요.")
+        choice = ask("1) 신규주택을 새로 샀다  2) 부모님 동거봉양을 위해 세대를 합쳤다  3) 혼인으로 세대를 합쳤다 : ",
+                     parse_two_house_choice)
+        reason = {"1": "temporary", "2": "parent_care", "3": "marriage"}[choice]
+        raw["two_house_reason"] = reason
+        if reason == "temporary":
+            raw["new_house_acquisition_date"] = ask("신규주택 취득일 (잔금일 등): ", parse_date)
+            raw["new_house_contract_date"] = ask("신규주택 매매계약 후 계약금을 지급한 날 (모르면 Enter): ",
+                                                 parse_date, optional=True)
+            raw["house_count_before_new"] = ask("신규주택을 취득하기 직전 세대가 보유한 주택 수 (종전주택만 있었다면 1): ",
+                                                parse_house_count)
+            old_reg = ask_yes_no("신규주택 취득일 현재 종전주택이 조정대상지역에 있었습니까?")
+            new_reg = ask_yes_no("신규주택이 취득일 현재 조정대상지역에 있었습니까?")
+            raw["old_house_regulated_at_new_acquisition"] = "예" if old_reg else "아니오"
+            raw["new_house_regulated_at_acquisition"] = "예" if new_reg else "아니오"
+            if old_reg and new_reg:
+                raw["new_area_designation_date"] = ask("신규주택 소재지가 조정대상지역으로 공고된 날 (모르면 Enter): ",
+                                                       parse_date, optional=True)
+        else:
+            what = "합가한 날" if reason == "parent_care" else "혼인신고일"
+            raw["merge_date"] = ask(f"{what}: ", parse_date)
+            raw["one_house_each_before_merge"] = "예" if ask_yes_no(
+                "합가(혼인) 직전에 양쪽 세대가 각각 정확히 1주택씩, 합쳐서 2주택이었습니까?") else "아니오"
+            if reason == "parent_care":
+                raw["parent_qualified"] = "예" if ask_yes_no(
+                    "합가 당시 직계존속(배우자의 직계존속 포함) 중 60세 이상인 분이 계셨습니까? "
+                    "(60세 미만이라도 질병 요양급여 대상 등 법령 요건에 해당하면 y)") else "아니오"
+                raw["was_separate_household"] = "예" if ask_yes_no(
+                    "합가 전에는 실제로 부모님과 별도 세대(생계를 따로)였습니까?") else "아니오"
         print()
     raw["acquisition_type"] = ask("취득 원인 (매매/상속/증여/기타): ", parse_acquisition)
     raw["regulated_at_acquisition"] = "예" if ask_yes_no("취득 당시 조정대상지역이었습니까?") else "아니오"
