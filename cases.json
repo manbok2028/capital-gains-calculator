@@ -1,0 +1,77 @@
+{
+  "note": "expected 값은 코드가 아니라 손계산으로 구했다. 각 사건의 계산 과정은 title/memo에 적어 둠.",
+  "cases": [
+    {
+      "id": "T01", "title": "고가주택 15억, 보유10 거주10 (표2 80%)",
+      "memo": "차익10억 x 1/5=2억, 공제80%=1.6억, 소득금액4천만-기본공제250만=3,750만, 3,750만x15%-126만=4,365,000",
+      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "residence_start": "2016-05-10", "residence_end": "2026-11-20"},
+      "expected": {"status": "HIGH_VALUE_PARTIAL", "tax_base": 37500000, "income_tax": 4365000, "local_tax": 436500, "total_tax": 4801500}
+    },
+    {
+      "id": "T02", "title": "고가주택 15억, 거주 없음 (표1 20%)",
+      "memo": "과세 2억, 공제20%=4천만, 1.6억-250만=1.575억, 1.575억x38%-1,994만=39,910,000",
+      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억"},
+      "expected": {"status": "HIGH_VALUE_PARTIAL", "tax_base": 157500000, "income_tax": 39910000, "local_tax": 3991000, "total_tax": 43901000}
+    },
+    {
+      "id": "T03", "title": "조정대상지역 취득, 거주 요건 미충족, 보유6년 (일반과세 표1 12%)",
+      "memo": "차익2.9억, 공제12%=3,480만, 2.552억-250만=2.527억, 2.527억x38%-1,994만=76,086,000",
+      "input": {"acquisition_date": "2020-01-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "8억", "expenses": "1000만", "regulated_at_acquisition": "예"},
+      "expected": {"status": "TAXABLE", "tax_base": 252700000, "income_tax": 76086000, "local_tax": 7608600, "total_tax": 83694600}
+    },
+    {
+      "id": "T04", "title": "조정대상지역 취득, 거주1년, 보유4년 (일반과세 표1 8%)",
+      "memo": "차익3억, 공제8%=2,400만, 2.76억-250만=2.735억, 2.735억x38%-1,994만=83,990,000",
+      "input": {"acquisition_date": "2022-01-10", "transfer_date": "2026-11-20", "acquisition_price": "6억", "transfer_price": "9억", "residence_start": "2022-01-10", "residence_end": "2023-01-10", "regulated_at_acquisition": "예"},
+      "expected": {"status": "TAXABLE", "tax_base": 273500000, "income_tax": 83990000, "local_tax": 8399000, "total_tax": 92389000}
+    },
+    {
+      "id": "T05", "title": "보유 1년 미만 (단기 70%)",
+      "memo": "차익1억, 공제0, 1억-250만=9,750만, x70%=68,250,000",
+      "input": {"acquisition_date": "2026-03-01", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "6억"},
+      "expected": {"status": "TAXABLE", "tax_base": 97500000, "income_tax": 68250000, "local_tax": 6825000, "total_tax": 75075000}
+    },
+    {
+      "id": "T06", "title": "보유 1년 이상 2년 미만 (단기 60%)",
+      "memo": "차익5천만, 5천만-250만=4,750만, x60%=28,500,000",
+      "input": {"acquisition_date": "2025-02-01", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "5억5000만"},
+      "expected": {"status": "TAXABLE", "tax_base": 47500000, "income_tax": 28500000, "local_tax": 2850000, "total_tax": 31350000}
+    },
+    {
+      "id": "T07", "title": "12억 이하, 보유10 거주10 (전액 비과세)",
+      "memo": "비과세라 과세표준과 세금 모두 0",
+      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "10억", "residence_start": "2016-05-10", "residence_end": "2026-11-20"},
+      "expected": {"status": "EXEMPT", "tax_base": 0, "income_tax": 0, "local_tax": 0, "total_tax": 0}
+    },
+    {
+      "id": "T08", "title": "양도차손 (비과세 요건 미충족)",
+      "memo": "양도가액이 취득가액보다 낮아 세금 0",
+      "input": {"acquisition_date": "2025-01-10", "transfer_date": "2026-11-20", "acquisition_price": "9억", "transfer_price": "8억"},
+      "expected": {"status": "TAXABLE", "tax_base": 0, "income_tax": 0, "local_tax": 0, "total_tax": 0}
+    },
+    {
+      "id": "T09", "title": "세대 보유 주택 2채 (자동 계산 범위 밖)",
+      "memo": "일시적 2주택/다주택은 상담 안내",
+      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "house_count": 2},
+      "expected": {"status": "CONSULT"}
+    },
+    {
+      "id": "T10", "title": "상속으로 취득한 주택 (자동 계산 범위 밖)",
+      "memo": "상속 취득은 상담 안내",
+      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "acquisition_type": "상속"},
+      "expected": {"status": "CONSULT"}
+    },
+    {
+      "id": "T11", "title": "양도일이 취득일보다 앞섬 (입력 오류)",
+      "memo": "입력 검증에서 오류로 처리되어야 함",
+      "input": {"acquisition_date": "2026-11-20", "transfer_date": "2016-05-10", "acquisition_price": "5억", "transfer_price": "6억"},
+      "expected": {"error": true}
+    },
+    {
+      "id": "T12", "title": "고가주택 + 이번 해 기본공제 이미 사용",
+      "memo": "T01에서 기본공제만 빼면 과세표준 4천만, 4천만x15%-126만=4,740,000",
+      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "residence_start": "2016-05-10", "residence_end": "2026-11-20", "basic_deduction_used": "예"},
+      "expected": {"status": "HIGH_VALUE_PARTIAL", "tax_base": 40000000, "income_tax": 4740000, "local_tax": 474000, "total_tax": 5214000}
+    }
+  ]
+}
