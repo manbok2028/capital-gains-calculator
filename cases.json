@@ -2,76 +2,476 @@
   "note": "expected 값은 코드가 아니라 손계산으로 구했다. 각 사건의 계산 과정은 title/memo에 적어 둠.",
   "cases": [
     {
-      "id": "T01", "title": "고가주택 15억, 보유10 거주10 (표2 80%)",
+      "id": "T01",
+      "title": "고가주택 15억, 보유10 거주10 (표2 80%)",
       "memo": "차익10억 x 1/5=2억, 공제80%=1.6억, 소득금액4천만-기본공제250만=3,750만, 3,750만x15%-126만=4,365,000",
-      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "residence_start": "2016-05-10", "residence_end": "2026-11-20"},
-      "expected": {"status": "HIGH_VALUE_PARTIAL", "tax_base": 37500000, "income_tax": 4365000, "local_tax": 436500, "total_tax": 4801500}
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "15억",
+        "residence_start": "2016-05-10",
+        "residence_end": "2026-11-20"
+      },
+      "expected": {
+        "status": "HIGH_VALUE_PARTIAL",
+        "tax_base": 37500000,
+        "income_tax": 4365000,
+        "local_tax": 436500,
+        "total_tax": 4801500
+      }
     },
     {
-      "id": "T02", "title": "고가주택 15억, 거주 없음 (표1 20%)",
+      "id": "T02",
+      "title": "고가주택 15억, 거주 없음 (표1 20%)",
       "memo": "과세 2억, 공제20%=4천만, 1.6억-250만=1.575억, 1.575억x38%-1,994만=39,910,000",
-      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억"},
-      "expected": {"status": "HIGH_VALUE_PARTIAL", "tax_base": 157500000, "income_tax": 39910000, "local_tax": 3991000, "total_tax": 43901000}
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "15억"
+      },
+      "expected": {
+        "status": "HIGH_VALUE_PARTIAL",
+        "tax_base": 157500000,
+        "income_tax": 39910000,
+        "local_tax": 3991000,
+        "total_tax": 43901000
+      }
     },
     {
-      "id": "T03", "title": "조정대상지역 취득, 거주 요건 미충족, 보유6년 (일반과세 표1 12%)",
+      "id": "T03",
+      "title": "조정대상지역 취득, 거주 요건 미충족, 보유6년 (일반과세 표1 12%)",
       "memo": "차익2.9억, 공제12%=3,480만, 2.552억-250만=2.527억, 2.527억x38%-1,994만=76,086,000",
-      "input": {"acquisition_date": "2020-01-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "8억", "expenses": "1000만", "regulated_at_acquisition": "예"},
-      "expected": {"status": "TAXABLE", "tax_base": 252700000, "income_tax": 76086000, "local_tax": 7608600, "total_tax": 83694600}
+      "input": {
+        "acquisition_date": "2020-01-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "8억",
+        "expenses": "1000만",
+        "regulated_at_acquisition": "예"
+      },
+      "expected": {
+        "status": "TAXABLE",
+        "tax_base": 252700000,
+        "income_tax": 76086000,
+        "local_tax": 7608600,
+        "total_tax": 83694600
+      }
     },
     {
-      "id": "T04", "title": "조정대상지역 취득, 거주1년, 보유4년 (일반과세 표1 8%)",
+      "id": "T04",
+      "title": "조정대상지역 취득, 거주1년, 보유4년 (일반과세 표1 8%)",
       "memo": "차익3억, 공제8%=2,400만, 2.76억-250만=2.735억, 2.735억x38%-1,994만=83,990,000",
-      "input": {"acquisition_date": "2022-01-10", "transfer_date": "2026-11-20", "acquisition_price": "6억", "transfer_price": "9억", "residence_start": "2022-01-10", "residence_end": "2023-01-10", "regulated_at_acquisition": "예"},
-      "expected": {"status": "TAXABLE", "tax_base": 273500000, "income_tax": 83990000, "local_tax": 8399000, "total_tax": 92389000}
+      "input": {
+        "acquisition_date": "2022-01-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "6억",
+        "transfer_price": "9억",
+        "residence_start": "2022-01-10",
+        "residence_end": "2023-01-10",
+        "regulated_at_acquisition": "예"
+      },
+      "expected": {
+        "status": "TAXABLE",
+        "tax_base": 273500000,
+        "income_tax": 83990000,
+        "local_tax": 8399000,
+        "total_tax": 92389000
+      }
     },
     {
-      "id": "T05", "title": "보유 1년 미만 (단기 70%)",
+      "id": "T05",
+      "title": "보유 1년 미만 (단기 70%)",
       "memo": "차익1억, 공제0, 1억-250만=9,750만, x70%=68,250,000",
-      "input": {"acquisition_date": "2026-03-01", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "6억"},
-      "expected": {"status": "TAXABLE", "tax_base": 97500000, "income_tax": 68250000, "local_tax": 6825000, "total_tax": 75075000}
+      "input": {
+        "acquisition_date": "2026-03-01",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "6억"
+      },
+      "expected": {
+        "status": "TAXABLE",
+        "tax_base": 97500000,
+        "income_tax": 68250000,
+        "local_tax": 6825000,
+        "total_tax": 75075000
+      }
     },
     {
-      "id": "T06", "title": "보유 1년 이상 2년 미만 (단기 60%)",
+      "id": "T06",
+      "title": "보유 1년 이상 2년 미만 (단기 60%)",
       "memo": "차익5천만, 5천만-250만=4,750만, x60%=28,500,000",
-      "input": {"acquisition_date": "2025-02-01", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "5억5000만"},
-      "expected": {"status": "TAXABLE", "tax_base": 47500000, "income_tax": 28500000, "local_tax": 2850000, "total_tax": 31350000}
+      "input": {
+        "acquisition_date": "2025-02-01",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "5억5000만"
+      },
+      "expected": {
+        "status": "TAXABLE",
+        "tax_base": 47500000,
+        "income_tax": 28500000,
+        "local_tax": 2850000,
+        "total_tax": 31350000
+      }
     },
     {
-      "id": "T07", "title": "12억 이하, 보유10 거주10 (전액 비과세)",
+      "id": "T07",
+      "title": "12억 이하, 보유10 거주10 (전액 비과세)",
       "memo": "비과세라 과세표준과 세금 모두 0",
-      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "10억", "residence_start": "2016-05-10", "residence_end": "2026-11-20"},
-      "expected": {"status": "EXEMPT", "tax_base": 0, "income_tax": 0, "local_tax": 0, "total_tax": 0}
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "residence_start": "2016-05-10",
+        "residence_end": "2026-11-20"
+      },
+      "expected": {
+        "status": "EXEMPT",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
     },
     {
-      "id": "T08", "title": "양도차손 (비과세 요건 미충족)",
+      "id": "T08",
+      "title": "양도차손 (비과세 요건 미충족)",
       "memo": "양도가액이 취득가액보다 낮아 세금 0",
-      "input": {"acquisition_date": "2025-01-10", "transfer_date": "2026-11-20", "acquisition_price": "9억", "transfer_price": "8억"},
-      "expected": {"status": "TAXABLE", "tax_base": 0, "income_tax": 0, "local_tax": 0, "total_tax": 0}
+      "input": {
+        "acquisition_date": "2025-01-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "9억",
+        "transfer_price": "8억"
+      },
+      "expected": {
+        "status": "TAXABLE",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
     },
     {
-      "id": "T09", "title": "세대 보유 주택 2채 (자동 계산 범위 밖)",
-      "memo": "일시적 2주택/다주택은 상담 안내",
-      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "house_count": 2},
-      "expected": {"status": "CONSULT"}
+      "id": "T09",
+      "title": "세대 보유 주택 3채 (자동 계산 범위 밖)",
+      "memo": "3주택 이상은 상담 안내",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "15억",
+        "house_count": 3
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
     },
     {
-      "id": "T10", "title": "상속으로 취득한 주택 (자동 계산 범위 밖)",
+      "id": "T10",
+      "title": "상속으로 취득한 주택 (자동 계산 범위 밖)",
       "memo": "상속 취득은 상담 안내",
-      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "acquisition_type": "상속"},
-      "expected": {"status": "CONSULT"}
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "15억",
+        "acquisition_type": "상속"
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
     },
     {
-      "id": "T11", "title": "양도일이 취득일보다 앞섬 (입력 오류)",
+      "id": "T11",
+      "title": "양도일이 취득일보다 앞섬 (입력 오류)",
       "memo": "입력 검증에서 오류로 처리되어야 함",
-      "input": {"acquisition_date": "2026-11-20", "transfer_date": "2016-05-10", "acquisition_price": "5억", "transfer_price": "6억"},
-      "expected": {"error": true}
+      "input": {
+        "acquisition_date": "2026-11-20",
+        "transfer_date": "2016-05-10",
+        "acquisition_price": "5억",
+        "transfer_price": "6억"
+      },
+      "expected": {
+        "error": true
+      }
     },
     {
-      "id": "T12", "title": "고가주택 + 이번 해 기본공제 이미 사용",
+      "id": "T12",
+      "title": "고가주택 + 이번 해 기본공제 이미 사용",
       "memo": "T01에서 기본공제만 빼면 과세표준 4천만, 4천만x15%-126만=4,740,000",
-      "input": {"acquisition_date": "2016-05-10", "transfer_date": "2026-11-20", "acquisition_price": "5억", "transfer_price": "15억", "residence_start": "2016-05-10", "residence_end": "2026-11-20", "basic_deduction_used": "예"},
-      "expected": {"status": "HIGH_VALUE_PARTIAL", "tax_base": 40000000, "income_tax": 4740000, "local_tax": 474000, "total_tax": 5214000}
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "15억",
+        "residence_start": "2016-05-10",
+        "residence_end": "2026-11-20",
+        "basic_deduction_used": "예"
+      },
+      "expected": {
+        "status": "HIGH_VALUE_PARTIAL",
+        "tax_base": 40000000,
+        "income_tax": 4740000,
+        "local_tax": 474000,
+        "total_tax": 5214000
+      }
+    },
+    {
+      "id": "U01",
+      "title": "일시적 2주택, 비조정 이동, 처분기한 3년 이내",
+      "memo": "신규 2025-03-01 취득, 기한 2028-03-01, 양도 2026-11-20, 10억 이하라 비과세",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2025-03-01"
+      },
+      "expected": {
+        "status": "EXEMPT",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
+    },
+    {
+      "id": "U02",
+      "title": "일시적 2주택, 조정->조정 2년 규정 이내, 15억 고가주택",
+      "memo": "신규 2026-09-01 취득(2년 기한 2028-09-01), 양도 2026-11-20. 이후 계산은 T01과 같음(보유10 거주10)",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "15억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "예",
+        "new_house_regulated_at_acquisition": "예",
+        "residence_start": "2016-05-10",
+        "residence_end": "2026-11-20",
+        "new_house_acquisition_date": "2026-09-01"
+      },
+      "expected": {
+        "status": "HIGH_VALUE_PARTIAL",
+        "tax_base": 37500000,
+        "income_tax": 4365000,
+        "local_tax": 436500,
+        "total_tax": 4801500
+      }
+    },
+    {
+      "id": "U03",
+      "title": "조정->조정, 2년 기한 초과 (양도 2028-09-02)",
+      "memo": "신규 2026-09-01 취득, 2년 기한 2028-09-01을 하루 넘김 -> 특례 불가, 상담",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2028-09-02",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "예",
+        "new_house_regulated_at_acquisition": "예",
+        "new_house_acquisition_date": "2026-09-01"
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
+    },
+    {
+      "id": "U04",
+      "title": "종전주택만 조정대상지역 (3년 규정), 같은 양도일 2028-09-02",
+      "memo": "신규주택이 조정대상지역이 아니라 3년 기한(2029-09-01) 이내 -> 비과세",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2028-09-02",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "예",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2026-09-01"
+      },
+      "expected": {
+        "status": "EXEMPT",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
+    },
+    {
+      "id": "U05",
+      "title": "경과조치: 계약금을 2026-07-20에 지급 (3년 규정)",
+      "memo": "조정->조정이지만 계약금 지급일이 8/3 이전이라 종전 규정 3년 -> 양도 2028-09-02 비과세",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2028-09-02",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "예",
+        "new_house_regulated_at_acquisition": "예",
+        "new_house_acquisition_date": "2026-09-01",
+        "new_house_contract_date": "2026-07-20"
+      },
+      "expected": {
+        "status": "EXEMPT",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
+    },
+    {
+      "id": "U06",
+      "title": "종전주택 취득 후 1년 경과 전에 신규주택 취득 (경계 당일)",
+      "memo": "종전 2020-06-10, 신규 2021-06-10은 아직 '1년 지난 후'가 아님 -> 특례 불가, 상담",
+      "input": {
+        "acquisition_date": "2020-06-10",
+        "transfer_date": "2023-12-01",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2021-06-10"
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
+    },
+    {
+      "id": "U07",
+      "title": "종전주택 취득 1년 경과 후 신규주택 취득 (다음 날)",
+      "memo": "종전 2020-06-10, 신규 2021-06-11 -> 1년 요건 충족, 기한 2024-06-11 이내 양도 2023-12-01 -> 비과세",
+      "input": {
+        "acquisition_date": "2020-06-10",
+        "transfer_date": "2023-12-01",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2021-06-11"
+      },
+      "expected": {
+        "status": "EXEMPT",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
+    },
+    {
+      "id": "U08",
+      "title": "3년 처분기한 마지막 날 양도",
+      "memo": "신규 2023-03-15, 양도 2026-03-15(응당일 당일) -> 비과세 (기한 계산 기준 확인 필요)",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-03-15",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2023-03-15"
+      },
+      "expected": {
+        "status": "EXEMPT",
+        "tax_base": 0,
+        "income_tax": 0,
+        "local_tax": 0,
+        "total_tax": 0
+      }
+    },
+    {
+      "id": "U09",
+      "title": "3년 처분기한 하루 초과",
+      "memo": "신규 2023-03-15, 양도 2026-03-16 -> 특례 불가, 상담",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-03-16",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2023-03-15"
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
+    },
+    {
+      "id": "U10",
+      "title": "신규주택 취득 직전 이미 2주택 (3주택이 된 경우)",
+      "memo": "1주택 상태에서 취득한 경우만 특례 적용 -> 상담",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 2,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2025-03-01"
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
+    },
+    {
+      "id": "U11",
+      "title": "일시적 2주택 요건은 맞지만 종전주택 보유 2년 미만",
+      "memo": "종전 2025-01-10 취득(보유1년), 신규 2026-02-10 취득 -> 1세대 1주택 비과세 요건 불충족, 상담",
+      "input": {
+        "acquisition_date": "2025-01-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오",
+        "new_house_acquisition_date": "2026-02-10"
+      },
+      "expected": {
+        "status": "CONSULT"
+      }
+    },
+    {
+      "id": "U12",
+      "title": "2주택인데 신규주택 취득일을 입력하지 않음",
+      "memo": "입력 검증에서 오류",
+      "input": {
+        "acquisition_date": "2016-05-10",
+        "transfer_date": "2026-11-20",
+        "acquisition_price": "5억",
+        "transfer_price": "10억",
+        "house_count": 2,
+        "house_count_before_new": 1,
+        "old_house_regulated_at_new_acquisition": "아니오",
+        "new_house_regulated_at_acquisition": "아니오"
+      },
+      "expected": {
+        "error": true
+      }
     }
   ]
 }

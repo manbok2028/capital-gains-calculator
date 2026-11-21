@@ -6,8 +6,8 @@ from inputs import parse_date, parse_won
 from run_cases import run_all
 
 INTRO = """=== 양도소득세 계산기 (주택) ===
-자동 계산 범위: 국내 주택 1채를 매매로 취득해 양도하는 경우 (1세대 1주택 비과세 판정 + 일반 과세)
-다주택, 일시적 2주택, 상속·증여 취득 등은 계산하지 않고 상담을 안내합니다.
+자동 계산 범위: 국내 주택을 매매로 취득해 양도하는 경우 (1세대 1주택 및 일시적 2주택 비과세 판정 + 일반 과세)
+일시적 2주택 비과세 특례는 판정합니다. 3채 이상, 상속·증여 취득, 특례 요건 미충족 등은 계산하지 않고 상담을 안내합니다.
 """
 
 
@@ -59,6 +59,21 @@ def collect_input():
                           parse_won, optional=True) or "0"
     raw["house_count"] = ask("양도일 현재 본인과 배우자 등 같은 세대가 보유한 주택 수 (양도하는 주택 포함): ",
                              parse_house_count)
+    if raw["house_count"] == "2":
+        print("\n[일시적 2주택 확인] 양도하는 주택(종전주택) 외에 신규주택을 새로 사서 2채가 된 경우의 질문입니다.")
+        raw["new_house_acquisition_date"] = ask("신규주택 취득일 (잔금일 등): ", parse_date)
+        raw["new_house_contract_date"] = ask("신규주택 매매계약 후 계약금을 지급한 날 (모르면 Enter): ",
+                                             parse_date, optional=True)
+        raw["house_count_before_new"] = ask("신규주택을 취득하기 직전 세대가 보유한 주택 수 (종전주택만 있었다면 1): ",
+                                            parse_house_count)
+        old_reg = ask_yes_no("신규주택 취득일 현재 종전주택이 조정대상지역에 있었습니까?")
+        new_reg = ask_yes_no("신규주택이 취득일 현재 조정대상지역에 있었습니까?")
+        raw["old_house_regulated_at_new_acquisition"] = "예" if old_reg else "아니오"
+        raw["new_house_regulated_at_acquisition"] = "예" if new_reg else "아니오"
+        if old_reg and new_reg:
+            raw["new_area_designation_date"] = ask("신규주택 소재지가 조정대상지역으로 공고된 날 (모르면 Enter): ",
+                                                   parse_date, optional=True)
+        print()
     raw["acquisition_type"] = ask("취득 원인 (매매/상속/증여/기타): ", parse_acquisition)
     raw["regulated_at_acquisition"] = "예" if ask_yes_no("취득 당시 조정대상지역이었습니까?") else "아니오"
     if ask_yes_no("이 주택에 직접 거주하셨습니까?"):

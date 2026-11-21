@@ -1,9 +1,10 @@
 """양도소득세 계산기 - 5단계: 세율 적용, 지방소득세, 최종 세액 (1차 범위: 국내 주택, 1세대 1주택 중심)"""
 
 from core import load_rules, tax_by_formula, local_income_tax
-from exemption import describe, format_won, judge_exemption, parse_scope
+from exemption import STATUS_LABELS, describe, format_won, judge_exemption, parse_scope
 from inputs import compute_periods, normalize_case
 from tax_base import calc_tax_base, describe_base
+from temporary_two import check_temporary_two_house
 
 NOTICE = ("※ 입력하신 내용만으로 계산한 참고용 결과입니다. 실제 신고 세액은 세대 구성, 보유 주택 수, "
           "취득·양도 시기, 필요경비 증빙 등에 따라 달라질 수 있으니 신고 전 세무사 확인을 권장합니다.")
@@ -32,10 +33,39 @@ def calculate(raw, rules=None, basic_deduction_available=True):
     rules = rules or load_rules()
     case = normalize_case(raw)
     periods = compute_periods(case)
-    exemption = judge_exemption(case, periods, parse_scope(raw), rules)
+    scope = parse_scope(raw)
+
+    # 세대 보유 주택이 2채이면 일시적 2주택 특례 요건부터 확인한다.
+    temp = None
+    if scope["house_count"] == 2:
+        temp = check_temporary_two_house(case, raw, rules)
+        if temp["qualifies"]:
+            scope = dict(scope, house_count=1)  # 특례: 종전주택을 1세대 1주택으로 본다
+        else:
+            exemption = {"status": "CONSULT", "label": STATUS_LABELS["CONSULT"],
+                         "taxable_ratio": None, "reasons": ["일시적 2주택 특례 요건을 충족하지 못했습니다."]
+                         + temp["reasons"]
+                         + ["이 경우 2주택자의 양도로 보아 조정대상지역 중과 등 별도 검토가 필요해 "
+                            "자동 계산하지 않습니다. 상담이 필요합니다."]}
+            return {"status": "CONSULT", "exemption": exemption, "periods": periods, "base": None,
+                    "rate_kind": None, "rate_pct": None, "income_tax": None, "local_tax": None,
+                    "total_tax": None, "temporary_two": temp}
+
+    exemption = judge_exemption(case, periods, scope, rules)
+    if temp is not None:
+        if exemption["status"] == "TAXABLE":
+            # 일시적 2주택 요건은 맞지만 종전주택이 1세대 1주택 비과세 요건(보유 2년, 거주 2년)을 못 채운 경우
+            exemption = {"status": "CONSULT", "label": STATUS_LABELS["CONSULT"], "taxable_ratio": None,
+                         "reasons": temp["reasons"]
+                         + ["그러나 종전주택이 1세대 1주택 비과세 요건을 충족하지 못했습니다."]
+                         + exemption["reasons"]
+                         + ["이 경우 2주택자의 양도로 과세될 수 있어 조정대상지역 중과 등 별도 검토가 필요합니다. "
+                            "자동 계산하지 않으니 상담이 필요합니다."]}
+        else:
+            exemption = dict(exemption, reasons=temp["reasons"] + exemption["reasons"])
     result = {"status": exemption["status"], "exemption": exemption, "periods": periods,
               "base": None, "rate_kind": None, "rate_pct": None,
-              "income_tax": None, "local_tax": None, "total_tax": None}
+              "income_tax": None, "local_tax": None, "total_tax": None, "temporary_two": temp}
     if exemption["status"] == "CONSULT":
         return result
 
